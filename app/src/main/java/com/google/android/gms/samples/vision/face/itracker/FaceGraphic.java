@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.gms.samples.vision.face.facetracker;
+package com.google.android.gms.samples.vision.face.itracker;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
-import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.samples.vision.face.itracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
-
-import java.util.List;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -98,23 +96,51 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     /*
     Returns coordinates of face.
      */
-    public float[] getFaceCoord() {
+    public void getFaceCoord() {
         Face face = mFace;
+        if (face != null) {
 
-        if (face == null) {
-            return null;
+            for (Landmark landmark : face.getLandmarks()) {
+                if ((landmark.getType() == Landmark.NOSE_BASE)) {
+                    float cx = translateX(landmark.getPosition().x);
+                    float cy = translateY(landmark.getPosition().y);
+
+                    if (cx2 == 0 && cy2 == 0) {
+                        cx2 = cx;
+                        cy2 = cy;
+
+                    }
+                    float deltaX = cx - cx2;
+                    float deltaY = cy - cy2;
+
+                    if (newX != 0) {
+                        newX = newX + deltaX * sensitivity;
+                        newY = newY + deltaY * sensitivity;
+                    } else {
+                        newX = cx;
+                        newY = cy;
+                    }
+
+                    cx2 = cx;
+                    cy2 = cy;
+
+                    Log.e(TAG, newX + ", " + newY);
+                }
+
+            }
         }
-
-        float x = translateX(face.getPosition().x + face.getWidth() / 2);
-        float y = translateY(face.getPosition().y + face.getHeight() / 2);
-
-        float[] xy = {x, y};
-
-        return xy;
     }
 
     public void setSensitivity(float sensitivity) {
         this.sensitivity = sensitivity;
+    }
+
+    public float getX() {
+        return newX;
+    }
+
+    public float getY() {
+        return newY;
     }
 
     /**
@@ -122,41 +148,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
      */
     @Override
     public void draw(Canvas canvas) {
-        Face face = mFace;
-        if (face == null) {
-            return;
-        }
+        getFaceCoord();
 
-
-
-        for (Landmark landmark : face.getLandmarks()) {
-            if ((landmark.getType() == Landmark.NOSE_BASE)) {
-                float cx = translateX(landmark.getPosition().x);
-                float cy = translateY(landmark.getPosition().y);
-
-                if (cx2 == 0 && cy2 == 0) {
-                    cx2 = cx;
-                    cy2 = cy;
-
-                }
-               float deltaX = cx - cx2;
-               float deltaY = cy - cy2;
-
-               if (newX != 0) {
-                   newX = newX + deltaX * sensitivity;
-                   newY = newY + deltaY * sensitivity;
-               } else {
-                   newX = cx;
-                   newY = cy;
-               }
-
-               cx2 = cx;
-               cy2 = cy;
-
-                canvas.drawCircle(newX, newY, 10, mFacePositionPaint);
-
-                Log.e(TAG, newX + ", " + newY);
-            }
+        if (mFace != null) {
+            canvas.drawCircle(newX, newY, 10, mFacePositionPaint);
         }
 
     }

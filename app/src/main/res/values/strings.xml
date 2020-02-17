@@ -3,5 +3,8 @@
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+    <string name="permission_accessibility_rationale">Access to your phone\'s accessibility services is needed to run the app.</string>
+    <string name="no_accessibility_permission">This application cannot run because it does not have the accessibility permission.  The application will now exit.</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+    <string name="cursor_accessibility">Cursor Accessibility Service</string>
 </resources>

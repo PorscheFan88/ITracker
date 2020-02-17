@@ -13,21 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.gms.samples.vision.face.facetracker;
+package com.google.android.gms.samples.vision.face.itracker;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.PermissionRequest;
 import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,9 +45,8 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview;
-import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
-import com.google.android.gms.vision.face.Landmark;
+import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
+import com.google.android.gms.samples.vision.face.itracker.ui.camera.GraphicOverlay;
 
 import java.io.IOException;
 
@@ -52,6 +59,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private CameraSource mCameraSource = null;
 
+    CursorAccessibilityService mService;
+    boolean mBound = false;
+
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
     private Button btnTracking;
@@ -59,6 +69,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
+    private static final int OVERLAY_PERMISSION_CODE = 3;
 
     //==============================================================================================
     // Activity Methods
@@ -77,7 +88,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         btnTracking = (Button) findViewById(R.id.btnTrack);
 
 
-
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -86,7 +96,32 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         } else {
             requestCameraPermission();
         }
+
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, OVERLAY_PERMISSION_CODE);
+        } else {
+            Intent i = new Intent(FaceTrackerActivity.this, CursorAccessibilityService.class);
+            startService(i);
+            bindService(i,mServerConn, Context.BIND_AUTO_CREATE);
+        }
+
     }
+
+    protected ServiceConnection mServerConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            Log.d(TAG, "onServiceConnected");
+            CursorAccessibilityService.LocalBinder mLocalBinder = (CursorAccessibilityService.LocalBinder) binder;
+            mService = mLocalBinder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "onServiceDisconnected");
+        }
+    };
+
 
     /**
      * Handles the requesting of the camera permission.  This includes
@@ -119,7 +154,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setAction(R.string.ok, listener)
                 .show();
     }
-
 
     private void createCameraSource() {
 
@@ -311,8 +345,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
 
-            float[] xy = mFaceGraphic.getFaceCoord();
-
+            mService.onMouseMove((int)mFaceGraphic.getX(), (int)mFaceGraphic.getY(), false);
         }
 
         /**

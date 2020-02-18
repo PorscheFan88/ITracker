@@ -38,6 +38,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -61,15 +62,12 @@ import static java.security.AccessController.getContext;
 public final class FaceTrackerActivity extends AppCompatActivity {
     private static final String TAG = "FaceTracker";
 
-    private CameraSource mCameraSource = null;
-
     CursorAccessibilityService mService;
-    boolean mBound = false;
 
-    private CameraSourcePreview mPreview;
     private Button btnTracking;
-    private GraphicOverlay mGraphicOverlay;
-    private GraphicFaceTracker mFaceTracker;
+    private RelativeLayout topLayout;
+
+    private boolean pGranted = false;
 
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
@@ -88,34 +86,29 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         btnTracking = (Button) findViewById(R.id.btnTrack);
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-
+        topLayout = (RelativeLayout) findViewById(R.id.topLayout);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource();
-        } else {
+        if (rc == PackageManager.PERMISSION_GRANTED && Settings.canDrawOverlays(this)) {
+           pGranted = true;
+        } else if ((rc != PackageManager.PERMISSION_GRANTED)) {
             requestCameraPermission();
-        }
-
-        if (!Settings.canDrawOverlays(this)) {
+        } else {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, OVERLAY_PERMISSION_CODE);
-        } else {
-            Intent i = new Intent(FaceTrackerActivity.this, CursorAccessibilityService.class);
-            startService(i);
-            bindService(i,mServerConn, Context.BIND_AUTO_CREATE);
         }
 
         btnTracking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mFaceTracker.setSensitivity(7);
-                mService.setTracking(true);
+                if (pGranted) {
+                    Intent i = new Intent(FaceTrackerActivity.this, CursorAccessibilityService.class);
+                    startService(i);
+                    bindService(i, mServerConn, Context.BIND_AUTO_CREATE);
+                }
             }
         });
     }
@@ -161,73 +154,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         };
 
-        Snackbar.make(mGraphicOverlay, R.string.permission_camera_rationale,
+        Snackbar.make(topLayout, R.string.permission_camera_rationale,
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.ok, listener)
                 .show();
     }
 
-    private void createCameraSource() {
-
-        Context context = getApplicationContext();
-        FaceDetector detector = new FaceDetector.Builder(context)
-                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
-                .setProminentFaceOnly(true)
-                .build();
-
-        detector.setProcessor(
-                new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
-                        .build());
-
-        if (!detector.isOperational()) {
-            // Note: The first time that an app using face API is installed on a device, GMS will
-            // download a native library to the device in order to do detection.  Usually this
-            // completes before the app is run for the first time.  But if that download has not yet
-            // completed, then the above call will not detect any faces.
-            //
-            // isOperational() can be used to check if the required native library is currently
-            // available.  The detector will automatically become operational once the library
-            // download completes on device.
-            Log.w(TAG, "Face detector dependencies are not yet available.");
-        }
-
-        mCameraSource = new CameraSource.Builder(context, detector)
-                .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_FRONT)
-                .setRequestedFps(30.0f)
-                .build();
-    }
-
-    /**
-     * Restarts the camera.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        startCameraSource();
-    }
-
-    /**
-     * Stops the camera.
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mPreview.stop();
-    }
-
-    /**
-     * Releases the resources associated with the camera source, the associated detector, and the
-     * rest of the processing pipeline.
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mCameraSource != null) {
-            mCameraSource.release();
-        }
-    }
 
     /**
      * Callback for the result from requesting permissions. This method
@@ -256,7 +188,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Camera permission granted - initialize the camera source");
             // we have permission, so create the camerasource
-            createCameraSource();
+
+            pGranted = true;
             return;
         }
 
@@ -275,122 +208,5 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.ok, listener)
                 .show();
     }
-
-    //==============================================================================================
-    // Camera Source Preview
-    //==============================================================================================
-    /**
-     * Face tracker for each detected individual. This maintains a face graphic within the app's
-     * associated face overlay.
-     */
-    private class GraphicFaceTracker extends Tracker<Face> {
-        private String TAG = "GraphicFaceTracker";
-
-        private volatile Face mFace;
-        private float cx2, cy2, newX, newY;
-        private float sensitivity = 1;
-
-        GraphicFaceTracker() {
-        }
-
-        /*
-      Returns coordinates of face.
-       */
-        public void getFaceCoord() {
-            Face face = mFace;
-            if (face != null) {
-
-                for (Landmark landmark : face.getLandmarks()) {
-                    if ((landmark.getType() == Landmark.NOSE_BASE)) {
-
-                        DisplayMetrics displayMetrics = new DisplayMetrics();
-                        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                        int width = displayMetrics.widthPixels;
-
-                        float cx = width - landmark.getPosition().x;
-                        float cy = landmark.getPosition().y;
-
-                        if (cx2 == 0 && cy2 == 0) {
-                            cx2 = cx;
-                            cy2 = cy;
-
-                        }
-                        float deltaX = cx - cx2;
-                        float deltaY = cy - cy2;
-
-                        if (newX != 0) {
-                            newX = newX + deltaX * sensitivity;
-                            newY = newY + deltaY * sensitivity;
-                        } else {
-                            newX = cx;
-                            newY = cy;
-                        }
-
-                        cx2 = cx;
-                        cy2 = cy;
-
-                        Log.e(TAG, newX + ", " + newY);
-                    }
-
-                }
-            }
-        }
-
-        public void setSensitivity(float sensitivity) {
-            this.sensitivity = sensitivity;
-        }
-
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        @Override
-        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            mFace = face;
-            getFaceCoord();
-            mService.onMouseMove((int)newX, (int)newY, false);
-        }
-
-
-    }
-    /**
-     * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
-     * (e.g., because onResume was called before the camera source was created), this will be called
-     * again when the camera source is created.
-     */
-    private void startCameraSource() {
-
-        // check that the device has play services available.
-        int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-                getApplicationContext());
-        if (code != ConnectionResult.SUCCESS) {
-            Dialog dlg =
-                    GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS);
-            dlg.show();
-        }
-
-        if (mCameraSource != null) {
-            try {
-                mPreview.start(mCameraSource, mGraphicOverlay);
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
-                mCameraSource.release();
-                mCameraSource = null;
-            }
-        }
-    }
-
-    /**
-     * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
-     * uses this factory to create face trackers as needed -- one for each individual.
-     */
-    public class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
-        @Override
-        public Tracker<Face> create(Face face) {
-            mFaceTracker = new GraphicFaceTracker();
-            return mFaceTracker;
-        }
-    }
-
 
 }

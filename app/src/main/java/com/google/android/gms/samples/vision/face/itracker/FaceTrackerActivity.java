@@ -33,6 +33,7 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
@@ -47,8 +48,11 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.vision.face.Landmark;
 
 import java.io.IOException;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -63,8 +67,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     boolean mBound = false;
 
     private CameraSourcePreview mPreview;
-    private GraphicOverlay mGraphicOverlay;
     private Button btnTracking;
+    private GraphicOverlay mGraphicOverlay;
+    private GraphicFaceTracker mFaceTracker;
 
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
@@ -84,8 +89,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         setContentView(R.layout.main);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
         btnTracking = (Button) findViewById(R.id.btnTrack);
+        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
 
 
         // Check for the camera permission before accessing the camera.  If the
@@ -106,6 +111,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             bindService(i,mServerConn, Context.BIND_AUTO_CREATE);
         }
 
+        btnTracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mFaceTracker.setSensitivity(7);
+                mService.setTracking(true);
+            }
+        });
     }
 
     protected ServiceConnection mServerConn = new ServiceConnection() {
@@ -160,6 +172,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                .setProminentFaceOnly(true)
                 .build();
 
         detector.setProcessor(
@@ -266,7 +279,80 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     //==============================================================================================
     // Camera Source Preview
     //==============================================================================================
+    /**
+     * Face tracker for each detected individual. This maintains a face graphic within the app's
+     * associated face overlay.
+     */
+    private class GraphicFaceTracker extends Tracker<Face> {
+        private String TAG = "GraphicFaceTracker";
 
+        private volatile Face mFace;
+        private float cx2, cy2, newX, newY;
+        private float sensitivity = 1;
+
+        GraphicFaceTracker() {
+        }
+
+        /*
+      Returns coordinates of face.
+       */
+        public void getFaceCoord() {
+            Face face = mFace;
+            if (face != null) {
+
+                for (Landmark landmark : face.getLandmarks()) {
+                    if ((landmark.getType() == Landmark.NOSE_BASE)) {
+
+                        DisplayMetrics displayMetrics = new DisplayMetrics();
+                        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                        int width = displayMetrics.widthPixels;
+
+                        float cx = width - landmark.getPosition().x;
+                        float cy = landmark.getPosition().y;
+
+                        if (cx2 == 0 && cy2 == 0) {
+                            cx2 = cx;
+                            cy2 = cy;
+
+                        }
+                        float deltaX = cx - cx2;
+                        float deltaY = cy - cy2;
+
+                        if (newX != 0) {
+                            newX = newX + deltaX * sensitivity;
+                            newY = newY + deltaY * sensitivity;
+                        } else {
+                            newX = cx;
+                            newY = cy;
+                        }
+
+                        cx2 = cx;
+                        cy2 = cy;
+
+                        Log.e(TAG, newX + ", " + newY);
+                    }
+
+                }
+            }
+        }
+
+        public void setSensitivity(float sensitivity) {
+            this.sensitivity = sensitivity;
+        }
+
+
+        /**
+         * Update the position/characteristics of the face within the overlay.
+         */
+        @Override
+        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+            mFace = face;
+            getFaceCoord();
+            mService.onMouseMove((int)newX, (int)newY, false);
+        }
+
+
+    }
     /**
      * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
      * (e.g., because onResume was called before the camera source was created), this will be called
@@ -294,77 +380,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
-    //==============================================================================================
-    // Graphic Face Tracker
-    //==============================================================================================
-
     /**
      * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
      * uses this factory to create face trackers as needed -- one for each individual.
      */
-    private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
+    public class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            return new GraphicFaceTracker(mGraphicOverlay);
+            mFaceTracker = new GraphicFaceTracker();
+            return mFaceTracker;
         }
     }
 
-    /**
-     * Face tracker for each detected individual. This maintains a face graphic within the app's
-     * associated face overlay.
-     */
-    private class GraphicFaceTracker extends Tracker<Face> {
-        private GraphicOverlay mOverlay;
-        private FaceGraphic mFaceGraphic;
 
-        GraphicFaceTracker(GraphicOverlay overlay) {
-            mOverlay = overlay;
-            mFaceGraphic = new FaceGraphic(overlay);
-
-            btnTracking.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mFaceGraphic.setSensitivity(7);
-                }
-            });
-        }
-
-        /**
-         * Start tracking the detected face instance within the face overlay.
-         */
-        @Override
-        public void onNewItem(int faceId, Face item) {
-            mFaceGraphic.setId(faceId);
-        }
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        @Override
-        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            mOverlay.add(mFaceGraphic);
-            mFaceGraphic.updateFace(face);
-
-            mService.onMouseMove((int)mFaceGraphic.getX(), (int)mFaceGraphic.getY(), false);
-        }
-
-        /**
-         * Hide the graphic when the corresponding face was not detected.  This can happen for
-         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
-         * view).
-         */
-        @Override
-        public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            mOverlay.remove(mFaceGraphic);
-        }
-
-        /**
-         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
-         * the overlay.
-         */
-        @Override
-        public void onDone() {
-            mOverlay.remove(mFaceGraphic);
-        }
-    }
 }

@@ -19,6 +19,14 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Button;
+
+import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
+import com.google.android.gms.samples.vision.face.itracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.vision.MultiProcessor;
+import com.google.android.gms.vision.Tracker;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -30,9 +38,15 @@ public class CursorAccessibilityService extends Service {
     private View cursorView;
     private LayoutParams cursorLayout;
     private WindowManager windowManager;
+    private boolean tracking = false;
+
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
+
+    public void setTracking(boolean tracking) {
+        this.tracking = tracking;
+    }
 
     private static void logNodeHierachy(AccessibilityNodeInfo nodeInfo, int depth) {
         Rect bounds = new Rect();
@@ -96,10 +110,16 @@ public class CursorAccessibilityService extends Service {
                 LayoutParams.FLAG_DISMISS_KEYGUARD | LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         cursorLayout.gravity = Gravity.TOP | Gravity.LEFT;
-        cursorLayout.x = 200;
-        cursorLayout.y = 200;
+        int mWidth= this.getResources().getDisplayMetrics().widthPixels;
+        int mHeight= this.getResources().getDisplayMetrics().heightPixels;
+
+        cursorLayout.x = mWidth/2;
+        cursorLayout.y = mHeight/2;
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        if (!tracking)
+            cursorView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -111,6 +131,9 @@ public class CursorAccessibilityService extends Service {
         }
     }
 
+    /**
+    Click function
+     */
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void click() {
 //        Log.d(TAG, String.format("Click [%d, %d]", cursorLayout.x, cursorLayout.y));
@@ -125,18 +148,23 @@ public class CursorAccessibilityService extends Service {
     }
 
     public void onMouseMove(int x, int y, boolean click) {
-        if (click)
-            click();
 
-        cursorLayout.x = x;
-        cursorLayout.y = y;
+        if (tracking) {
+            if (click)
+                click();
 
-        new Handler(getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                windowManager.updateViewLayout(cursorView, cursorLayout);
-            }
-        });
+            cursorView.setVisibility(View.VISIBLE);
+
+            cursorLayout.x = x;
+            cursorLayout.y = y;
+
+            new Handler(getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    windowManager.updateViewLayout(cursorView, cursorLayout);
+                }
+            });
+        }
 
     }
 
@@ -158,5 +186,12 @@ public class CursorAccessibilityService extends Service {
             return CursorAccessibilityService.this;
         }
     }
+
+    //==============================================================================================
+    // Graphic Face Tracker
+    //==============================================================================================
+
+
+
 
 }

@@ -62,8 +62,6 @@ import static java.security.AccessController.getContext;
 public final class FaceTrackerActivity extends AppCompatActivity {
     private static final String TAG = "FaceTracker";
 
-    CursorAccessibilityService mService;
-
     private Button btnTracking;
     private RelativeLayout topLayout;
 
@@ -89,7 +87,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         btnTracking = (Button) findViewById(R.id.btnTrack);
         topLayout = (RelativeLayout) findViewById(R.id.topLayout);
 
-        // Check for the camera permission before accessing the camera.  If the
+
+            // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED && Settings.canDrawOverlays(this)) {
@@ -105,27 +104,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (pGranted) {
-                    Intent i = new Intent(FaceTrackerActivity.this, CursorAccessibilityService.class);
-                    startService(i);
-                    bindService(i, mServerConn, Context.BIND_AUTO_CREATE);
+
                 }
             }
         });
     }
-
-    protected ServiceConnection mServerConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            Log.d(TAG, "onServiceConnected");
-            CursorAccessibilityService.LocalBinder mLocalBinder = (CursorAccessibilityService.LocalBinder) binder;
-            mService = mLocalBinder.getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "onServiceDisconnected");
-        }
-    };
 
 
     /**

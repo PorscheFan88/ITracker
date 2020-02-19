@@ -36,6 +36,7 @@ public class CursorService extends AccessibilityService {
     CameraSource mCameraSource = null;
     WindowManager wm;
     WindowManager.LayoutParams cursorLP, previewLP;
+    AccessibilityNodeInfo nodeInfo;
 
     @Override
     protected void onServiceConnected() {
@@ -77,7 +78,8 @@ public class CursorService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-
+        Log.e(TAG, "OnAccessibilityEvent");
+        nodeInfo = event.getSource();
     }
 
     @Override
@@ -143,14 +145,15 @@ public class CursorService extends AccessibilityService {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void click() {
         Log.d(TAG, String.format("Click [%d, %d]", cursorLP.x, cursorLP.y));
-        AccessibilityNodeInfo nodeInfo = this.getRootInActiveWindow();
+
         if (nodeInfo == null) return;
-        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorLP.x, cursorLP.y + 50);
+        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorLP.x + 300, cursorLP.y + 100);
         if (nearestNodeToMouse != null) {
             logNodeHierachy(nearestNodeToMouse, 0);
             nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+        } else {
+            Log.e(TAG, "Nearest Node is null");
         }
-        nodeInfo.recycle();
     }
 
     private static void logNodeHierachy(AccessibilityNodeInfo nodeInfo, int depth) {
@@ -249,8 +252,6 @@ public class CursorService extends AccessibilityService {
 
                         cx2 = cx;
                         cy2 = cy;
-
-                        Log.e(TAG, newX + ", " + newY);
                     }
 
                 }

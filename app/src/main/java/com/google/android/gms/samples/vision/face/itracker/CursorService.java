@@ -79,7 +79,7 @@ public class CursorService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         Log.e(TAG, "OnAccessibilityEvent");
-        nodeInfo = event.getSource();
+        nodeInfo = this.getRootInActiveWindow();
     }
 
     @Override

@@ -79,7 +79,6 @@ public class CursorService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         Log.e(TAG, "OnAccessibilityEvent");
-        nodeInfo = this.getRootInActiveWindow();
     }
 
     @Override
@@ -145,13 +144,14 @@ public class CursorService extends AccessibilityService {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void click() {
         Log.d(TAG, String.format("Click [%d, %d]", cursorLP.x, cursorLP.y));
-
+        nodeInfo = this.getRootInActiveWindow();
         if (nodeInfo == null) return;
         AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorLP.x + 300, cursorLP.y + 100);
         if (nearestNodeToMouse != null) {
             logNodeHierachy(nearestNodeToMouse, 0);
             nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         } else {
+            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
             Log.e(TAG, "Nearest Node is null");
         }
     }

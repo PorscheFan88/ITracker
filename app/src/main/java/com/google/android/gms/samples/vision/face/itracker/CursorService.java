@@ -3,6 +3,7 @@ package com.google.android.gms.samples.vision.face.itracker;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
@@ -28,18 +29,19 @@ import java.io.IOException;
 
 public class CursorService extends AccessibilityService {
     private static final String TAG = CursorService.class.getName();
-    FrameLayout cursorLayout;
-    FrameLayout previewLayout;
+    private FrameLayout cursorLayout;
 
-    CameraSourcePreview mPreview;
-    GraphicFaceTracker mFaceTracker;
-    CameraSource mCameraSource = null;
-    WindowManager wm;
-    WindowManager.LayoutParams cursorLP, previewLP;
-    AccessibilityNodeInfo nodeInfo;
+    private CameraSourcePreview mPreview;
+    private GraphicFaceTracker mFaceTracker;
+    private CameraSource mCameraSource = null;
+    private WindowManager wm;
+    private WindowManager.LayoutParams cursorLP, previewLP;
+    private AccessibilityActions accessibilityActions;
 
     @Override
     protected void onServiceConnected() {
+        accessibilityActions = new AccessibilityActions(CursorService.this);
+
         // Create an overlay and display the action bar
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         cursorLayout = new FrameLayout(this);
@@ -53,8 +55,7 @@ public class CursorService extends AccessibilityService {
         LayoutInflater inflater = LayoutInflater.from(this);
         inflater.inflate(R.layout.cursor, cursorLayout);
 
-
-        previewLayout = new FrameLayout(this);
+        FrameLayout previewLayout = new FrameLayout(this);
         previewLP = new WindowManager.LayoutParams();
         previewLP.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         previewLP.format = PixelFormat.TRANSLUCENT;
@@ -76,9 +77,16 @@ public class CursorService extends AccessibilityService {
         createCameraSource();
     }
 
+    public int getX() {
+        return cursorLP.x;
+    }
+
+    public int getY() {
+        return cursorLP.y;
+    }
+
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        Log.e(TAG, "OnAccessibilityEvent");
     }
 
     @Override
@@ -138,161 +146,23 @@ public class CursorService extends AccessibilityService {
         }
     }
 
-    /**
-     Click function
-     */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void click() {
-        Log.d(TAG, String.format("Click [%d, %d]", cursorLP.x, cursorLP.y));
-        nodeInfo = this.getRootInActiveWindow();
-        if (nodeInfo == null) return;
-        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorLP.x + 300, cursorLP.y + 100);
-        if (nearestNodeToMouse != null) {
-            logNodeHierachy(nearestNodeToMouse, 0);
-            nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-        } else {
-            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
-            Log.e(TAG, "Nearest Node is null");
-        }
+    public void click() {
+        accessibilityActions.click();
     }
 
-    private static void logNodeHierachy(AccessibilityNodeInfo nodeInfo, int depth) {
-        Rect bounds = new Rect();
-        nodeInfo.getBoundsInScreen(bounds);
+    public void onMouseMove(int x, int y) {
 
-        StringBuilder sb = new StringBuilder();
-        if (depth > 0) {
-            for (int i=0; i<depth; i++) {
-                sb.append("  ");
+        cursorLP.x = x;
+        cursorLP.y = y;
+
+        new Handler(getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                wm.updateViewLayout(cursorLayout, cursorLP);
             }
-            sb.append("\u2514 ");
-        }
-        sb.append(nodeInfo.getClassName());
-        sb.append(" (" + nodeInfo.getChildCount() +  ")");
-        sb.append(" " + bounds.toString());
-        if (nodeInfo.getText() != null) {
-            sb.append(" - \"" + nodeInfo.getText() + "\"");
-        }
-        Log.v(TAG, sb.toString());
-
-        for (int i=0; i<nodeInfo.getChildCount(); i++) {
-            AccessibilityNodeInfo childNode = nodeInfo.getChild(i);
-            if (childNode != null) {
-                logNodeHierachy(childNode, depth + 1);
-            }
-        }
-    }
-
-    private static AccessibilityNodeInfo findSmallestNodeAtPoint(AccessibilityNodeInfo sourceNode, int x, int y) {
-        Rect bounds = new Rect();
-        sourceNode.getBoundsInScreen(bounds);
-
-        if (!bounds.contains(x, y)) {
-            return null;
-        }
-
-        for (int i=0; i<sourceNode.getChildCount(); i++) {
-            AccessibilityNodeInfo nearestSmaller = findSmallestNodeAtPoint(sourceNode.getChild(i), x, y);
-            if (nearestSmaller != null) {
-                return nearestSmaller;
-            }
-        }
-        return sourceNode;
-    }
-
-    //==============================================================================================
-    // Camera Source Preview
-    //==============================================================================================
-    /**
-     * Face tracker for each detected individual. This maintains a face graphic within the app's
-     * associated face overlay.
-     */
-    private class GraphicFaceTracker extends Tracker<Face> {
-        private String TAG = "GraphicFaceTracker";
-
-        private volatile Face mFace;
-        private float cx2, cy2, newX, newY;
-        private float sensitivity = 7;
-
-        GraphicFaceTracker() {
-        }
-
-        /*
-      Returns coordinates of face.
-       */
-        public void getFaceCoord() {
-            Face face = mFace;
-            if (face != null) {
-
-                for (Landmark landmark : face.getLandmarks()) {
-                    if ((landmark.getType() == Landmark.NOSE_BASE)) {
-
-                        WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-                        Display display = window.getDefaultDisplay();
-                        int width = display.getWidth();
-
-                        float cx = width - landmark.getPosition().x;
-                        float cy = landmark.getPosition().y;
-
-                        if (cx2 == 0 && cy2 == 0) {
-                            cx2 = cx;
-                            cy2 = cy;
-
-                        }
-                        float deltaX = cx - cx2;
-                        float deltaY = cy - cy2;
-
-                        if (newX != 0) {
-                            newX = newX + deltaX * sensitivity;
-                            newY = newY + deltaY * sensitivity;
-                        } else {
-                            newX = cx;
-                            newY = cy;
-                        }
-
-                        cx2 = cx;
-                        cy2 = cy;
-                    }
-
-                }
-            }
-        }
-
-        public void setSensitivity(float sensitivity) {
-            this.sensitivity = sensitivity;
-        }
-
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        @Override
-        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            mFace = face;
-            getFaceCoord();
-            if (face.getIsSmilingProbability() > 0.5) {
-                click();
-            } else {
-                onMouseMove((int) newX, (int) newY);
-            }
-        }
-
-        public void onMouseMove(int x, int y) {
-
-            cursorLP.x = x;
-            cursorLP.y = y;
-
-            new Handler(getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    wm.updateViewLayout(cursorLayout, cursorLP);
-                }
-            });
-
-        }
+        });
 
     }
-
     /**
      * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
      * uses this factory to create face trackers as needed -- one for each individual.
@@ -300,7 +170,7 @@ public class CursorService extends AccessibilityService {
     public class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            mFaceTracker = new GraphicFaceTracker();
+            mFaceTracker = new GraphicFaceTracker(CursorService.this);
             return mFaceTracker;
         }
     }

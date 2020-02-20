@@ -7,4 +7,15 @@
     <string name="no_accessibility_permission">This application cannot run because it does not have the accessibility permission.  The application will now exit.</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="cursor_accessibility">ITracker</string>
+    <string name="service_description">Definitely not a virus made by M. Chuck ;)</string>
+    <string name="action_click">Click</string>
+    <string name="action_long_click">Long Click</string>
+    <string name="action_scroll_backward">Scroll Back</string>
+    <string name="action_scroll_forward">Scroll Forward</string>
+    <string name="action_collapse">Collapse</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_cut">Cut</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_expand">Expand</string>
+    <string name="action_paste">Paste</string>
 </resources>

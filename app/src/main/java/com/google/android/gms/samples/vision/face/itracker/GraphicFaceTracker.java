@@ -2,8 +2,10 @@ package com.google.android.gms.samples.vision.face.itracker;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -19,9 +21,10 @@ public class GraphicFaceTracker extends Tracker<Face> {
 
     private volatile Face mFace;//Users face
     private float cx2, cy2,//Second floats for calculating deltas
-            newX, newY;//The final X and Y coordinates after sensitivity effect
-    private float sensitivity = 7;//Controls how fast the cursor moves. Default 7.
+            newX = 0, newY = 0;//The final X and Y coordinates after sensitivity effect
+    private float sensitivity = 8;//Controls how fast the cursor moves. Default 7.
     private CursorService cursorService;
+    private int clickC = 0;//Click counter avoids rapid click firing
 
     GraphicFaceTracker(CursorService cs) {
         cursorService = cs;
@@ -42,7 +45,6 @@ public class GraphicFaceTracker extends Tracker<Face> {
 
                     float cx = width - landmark.getPosition().x;//X will be the opposite of the landmark position
                     float cy = landmark.getPosition().y;
-                    //@TODO cx = width - landmark.getPosition().x + calibrationNum;
 
                     //If final positions are zero, then face is being recognized for the first time
                     //Set final positions to current face location
@@ -86,10 +88,18 @@ public class GraphicFaceTracker extends Tracker<Face> {
     public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
         mFace = face;
         getFaceCoord();//Update the position of the face
+
+        //@TODO find a facial movement for toolbar controls.
         if (face.getIsSmilingProbability() > 0.5) {
-            cursorService.click();
+            if (clickC < 1) {//Perform individual click
+                cursorService.click();
+            } else if (clickC > 5) {//Perform long click
+                cursorService.longClick();
+            }
+            clickC++;
         } else {
             cursorService.onMouseMove((int) newX, (int) newY);
+            clickC = 0;
         }
     }
 

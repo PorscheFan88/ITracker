@@ -7,7 +7,7 @@
     <string name="no_accessibility_permission">This application cannot run because it does not have the accessibility permission.  The application will now exit.</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="cursor_accessibility">ITracker</string>
-    <string name="service_description">Definitely not a virus made by M. Chuck ;)</string>
+    <string name="service_description">Tracks nose movement to assist with phone use. ©2020 Eric Klassen</string>
     <string name="action_click">Click</string>
     <string name="action_long_click">Long Click</string>
     <string name="action_scroll_backward">Scroll Back</string>
@@ -18,4 +18,9 @@
     <string name="action_dismiss">Dismiss</string>
     <string name="action_expand">Expand</string>
     <string name="action_paste">Paste</string>
+    <string name="sync">Sync Cursor</string>
+    <string name="sensitivity">Sensitivity</string>
+    <string name="hotkeys">Hotkeys</string>
+    <string name="speech">Speech</string>
+    <string name="align">Face forwards looking directly at the circle. Click when you are looking at the circle.</string>
 </resources>

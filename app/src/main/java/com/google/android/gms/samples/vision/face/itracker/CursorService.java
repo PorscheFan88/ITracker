@@ -12,10 +12,12 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.vision.CameraSource;
@@ -27,9 +29,15 @@ import com.google.android.gms.vision.face.Landmark;
 
 import java.io.IOException;
 
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
 public class CursorService extends AccessibilityService {
     private static final String TAG = CursorService.class.getName();
-    private FrameLayout cursorLayout;
+    private FrameLayout cursorLayout, settingsLayout;
 
     private CameraSourcePreview mPreview;
     private GraphicFaceTracker mFaceTracker;
@@ -37,6 +45,7 @@ public class CursorService extends AccessibilityService {
     private WindowManager wm;
     private WindowManager.LayoutParams cursorLP, previewLP;
     private AccessibilityActions accessibilityActions;
+
 
     @Override
     protected void onServiceConnected() {
@@ -48,10 +57,10 @@ public class CursorService extends AccessibilityService {
         cursorLP = new WindowManager.LayoutParams();
         cursorLP.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         cursorLP.format = PixelFormat.TRANSLUCENT;
-        cursorLP.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        cursorLP.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_NO_LIMITS;
         cursorLP.width = WindowManager.LayoutParams.WRAP_CONTENT;
         cursorLP.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        cursorLP.gravity = Gravity.TOP;
+        cursorLP.gravity = Gravity.START|Gravity.TOP;
         LayoutInflater inflater = LayoutInflater.from(this);
         inflater.inflate(R.layout.cursor, cursorLayout);
 
@@ -69,8 +78,8 @@ public class CursorService extends AccessibilityService {
 
         cursorLP.y = mHeight/2;
 
-        wm.addView(cursorLayout, cursorLP);
         wm.addView(previewLayout, previewLP);
+        wm.addView(cursorLayout, cursorLP);
 
         mPreview = (CameraSourcePreview) previewLayout.findViewById(R.id.camView);//Getting camera preview from floating layout
 
@@ -149,6 +158,18 @@ public class CursorService extends AccessibilityService {
     public void click() {
         accessibilityActions.click();
     }
+
+    public void longClick(){
+        accessibilityActions.longClick();
+    }
+
+    public void goHome(){
+        accessibilityActions.goHome(getBaseContext());
+    }
+
+    public void goBack() {}//@TODO go back
+
+    public void goRecents() {}//@TODO go to recent windows
 
     public void onMouseMove(int x, int y) {
 

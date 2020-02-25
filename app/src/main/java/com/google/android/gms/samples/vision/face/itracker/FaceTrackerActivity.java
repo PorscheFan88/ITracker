@@ -191,5 +191,4 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.ok, listener)
                 .show();
     }
-
 }

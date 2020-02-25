@@ -1,16 +1,23 @@
 package com.google.android.gms.samples.vision.face.itracker;
 
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * Class performs all accessibility actions (click, swipe, long-click, etc.)
  */
 public class AccessibilityActions {
+
+
     private static final String TAG = CursorService.class.getName();
     private CursorService cursorService;
     private AccessibilityNodeInfo nodeInfo;
@@ -22,14 +29,13 @@ public class AccessibilityActions {
     /**
      Click function
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void click() {
 
         Log.d(TAG, String.format("Click [%d, %d]", cursorService.getX(), cursorService.getY()));
         nodeInfo = cursorService.getRootInActiveWindow();
 
         if (nodeInfo == null) return;
-        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorService.getX() + 400, cursorService.getY() + 100);
+        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorService.getX(), cursorService.getY()+50);
         if (nearestNodeToMouse != null) {
             logNodeHierachy(nearestNodeToMouse, 0);
             nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_CLICK);
@@ -38,6 +44,33 @@ public class AccessibilityActions {
             Log.e(TAG, "Nearest Node is null");
         }
     }
+
+    /**
+    Long Click function
+     */
+    public void longClick() {
+
+        Log.d(TAG, String.format("Click [%d, %d]", cursorService.getX(), cursorService.getY()));
+        nodeInfo = cursorService.getRootInActiveWindow();
+
+        if (nodeInfo == null) return;
+        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorService.getX(), cursorService.getY()+50);
+        if (nearestNodeToMouse != null) {
+            logNodeHierachy(nearestNodeToMouse, 0);
+            nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        } else {
+            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
+            Log.e(TAG, "Nearest Node is null");
+        }
+    }
+
+    public void goHome(Context ctx) {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(startMain);
+    }
+
 
     private static void logNodeHierachy(AccessibilityNodeInfo nodeInfo, int depth) {
         Rect bounds = new Rect();

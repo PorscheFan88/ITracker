@@ -16,4 +16,13 @@
     <string name="tab_text_1">Greetings</string>
     <string name="tab_text_2">Actions</string>
     <string name="tab_text_3">Reactions</string>
+    <string name="greeting_1">Hello</string>
+    <string name="greeting_2">Hi</string>
+    <string name="action_1">Help</string>
+    <string name="action_2">Slow Down</string>
+    <string name="action_3">Speed Up</string>
+    <string name="reaction_1">Thank You</string>
+    <string name="reaction_2">Very Funny</string>
+    <string name="reaction_3">I\'m Happy</string>
+    <string name="reaction_4">I\'m Sad</string>
 </resources>

@@ -30,19 +30,20 @@
             app:tabTextColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.view.ViewPager
+    <com.google.android.gms.samples.vision.face.itracker.activities.ui.main.NonSwipeableViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/colorPrimary"/>
+        android:background="@color/colorPrimary"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:backgroundTint="@color/colorAccent"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_add_circle" />
 </android.support.design.widget.CoordinatorLayout>

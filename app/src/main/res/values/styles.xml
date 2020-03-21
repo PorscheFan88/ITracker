@@ -18,6 +18,12 @@
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
+    <style name="VoiceButton" parent="MainButton">
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_rowWeight">1</item>
+        <item name="android:layout_gravity">fill</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->

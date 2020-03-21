@@ -1,5 +1,6 @@
 package com.google.android.gms.samples.vision.face.itracker.activities.ui.main;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.support.annotation.Nullable;
@@ -16,8 +18,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.widget.Toast;
 
 import com.google.android.gms.samples.vision.face.itracker.R;
+import com.google.android.gms.samples.vision.face.itracker.activities.SharedPreferenceWords;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -28,6 +32,11 @@ import java.util.Locale;
 public class PlaceholderFragment extends Fragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
+
+    //ArrayLists to store words
+    private ArrayList<String> greetings = new ArrayList<>();
+    private ArrayList<String> actions = new ArrayList<>();
+    private ArrayList<String> reactions = new ArrayList<>();
 
     private PageViewModel pageViewModel;
 
@@ -54,52 +63,43 @@ public class PlaceholderFragment extends Fragment {
 
     @Override
     public View onCreateView(
-            @NonNull LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+            @NonNull LayoutInflater inflater, final ViewGroup container,
+            final Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_voice, container, false);
+
+        //Load shared preferences for words
+        final SharedPreferences pref = getContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+        //Populating arrayLists with words
+        greetings = SharedPreferenceWords.toArrayList(pref, "greeting_");
+        actions = SharedPreferenceWords.toArrayList(pref, "action_");
+        reactions = SharedPreferenceWords.toArrayList(pref, "reaction_");
 
         final GridLayout grid = root.findViewById(R.id.grid);//Inflate gridview
 
         int index = getArguments().getInt(ARG_SECTION_NUMBER);//Get current page index
 
-        //Load shared preferences for words
-        SharedPreferences pref = getContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
         //Array list to store words
-        ArrayList<String> words = new ArrayList<>();
-
-        String tag;//Store preference tag
-        //Chooses tag based on index
+        final ArrayList<String> words;
+        final String tag;
+        //Chooses correct set of words
         if (index == 1) {
-            tag = "greeting_";
+           words = greetings;
+           tag = "greeting_";
         } else if (index == 2) {
+            words = actions;
             tag = "action_";
         } else {
+            words = reactions;
             tag = "reaction_";
         }
 
-        boolean run = true;//Tester for loop
-        int counter = 1;//Loop counter
-        //Loops through preferences
-        while (run) {
-            String word = pref.getString(tag + counter, null);//Finds word in preferences
-            if (word == null) {//If word is null, exit.
-                run = false;
-                counter = 1;
-            } else {//If not null add to list, increment counter
-                words.add(word);
-                counter++;
-            }
-        }
-
-        editor.apply();//Apply changes
-
+        //Speech engine
         final TextToSpeech speech =new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
             }
         });
-        speech.setLanguage(Locale.CANADA);
+        speech.setLanguage(Locale.CANADA);//Language
 
         /*
         Add buttons to gridview
@@ -129,11 +129,41 @@ public class PlaceholderFragment extends Fragment {
             btn.setAllCaps(false);
             btn.setText(words.get(i));
             grid.addView(btn);
-
+            //Click listener
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //Speak
                     speech.speak(btn.getText().toString(),TextToSpeech.QUEUE_FLUSH, null);
+                }
+            });
+            //On a long click, delete word
+            btn.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                    final LayoutInflater inflater = LayoutInflater.from(getContext());
+                    final View dialogView= inflater.inflate(R.layout.delete_word_dialog, null);
+
+                    builder.setView(dialogView);
+                    final AlertDialog ad = builder.create();
+                    ad.show();
+
+                    dialogView.findViewById(R.id.btnDeleteWord).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            words.remove(btn.getText().toString());//Remove word from list
+                            SharedPreferenceWords.toSharedPreference(pref,tag,words);//Update preferences
+                            ad.cancel();//Close dialog
+
+                            Toast.makeText(getContext(), getString(R.string.word_deleted), Toast.LENGTH_LONG).show();
+
+                            grid.removeView(btn);//Remove UI Button. (Real word has been removed already)
+
+                        }
+                    });
+                    return false;
                 }
             });
 

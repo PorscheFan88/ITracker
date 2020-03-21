@@ -25,4 +25,11 @@
     <string name="reaction_2">Very Funny</string>
     <string name="reaction_3">I\'m Happy</string>
     <string name="reaction_4">I\'m Sad</string>
+    <string name="add_word">Add Word</string>
+    <string name="delete_word">Delete Word?</string>
+    <string name="word_deleted">Word Deleted</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="incorrect_input">Incorrect Input</string>
+    <string name="word_added">Word Added!</string>
 </resources>

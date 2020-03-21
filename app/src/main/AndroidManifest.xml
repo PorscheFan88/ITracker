@@ -14,9 +14,22 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
-        android:label="FaceTracker"
-        android:theme="@style/Theme.AppCompat"
-        >
+        android:label="@string/name"
+        android:theme="@style/MainTheme">
+        <activity
+            android:name=".activities.Voice"
+            android:label="@string/title_activity_voice"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activities.StartUp"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -26,21 +39,18 @@
             android:value="face" />
 
         <activity
-            android:name=".FaceTrackerActivity"
+            android:name=".activities.FaceTrackerActivity"
             android:icon="@drawable/icon"
-            android:label="Face Tracker"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:label="@string/name"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <service
-            android:name=".CursorService"
+            android:name=".service.CursorService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

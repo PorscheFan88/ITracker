@@ -1,15 +1,9 @@
-package com.google.android.gms.samples.vision.face.itracker;
+package com.google.android.gms.samples.vision.face.itracker.service;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**

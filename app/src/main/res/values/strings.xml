@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="name">iGaze</string>
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -8,19 +9,11 @@
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="cursor_accessibility">ITracker</string>
     <string name="service_description">Tracks nose movement to assist with phone use. ©2020 Eric Klassen</string>
-    <string name="action_click">Click</string>
-    <string name="action_long_click">Long Click</string>
-    <string name="action_scroll_backward">Scroll Back</string>
-    <string name="action_scroll_forward">Scroll Forward</string>
-    <string name="action_collapse">Collapse</string>
-    <string name="action_copy">Copy</string>
-    <string name="action_cut">Cut</string>
-    <string name="action_dismiss">Dismiss</string>
-    <string name="action_expand">Expand</string>
-    <string name="action_paste">Paste</string>
-    <string name="sync">Sync Cursor</string>
-    <string name="sensitivity">Sensitivity</string>
-    <string name="hotkeys">Hotkeys</string>
-    <string name="speech">Speech</string>
-    <string name="align">Face forwards looking directly at the circle. Click when you are looking at the circle.</string>
+    <string name="cursor">Start Cursor</string>
+    <string name="voice">Voice</string>
+    <string name="settings">Settings</string>
+    <string name="title_activity_voice">Voice</string>
+    <string name="tab_text_1">Greetings</string>
+    <string name="tab_text_2">Actions</string>
+    <string name="tab_text_3">Reactions</string>
 </resources>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.android.gms.samples.vision.face.itracker;
+package com.google.android.gms.samples.vision.face.itracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -25,6 +25,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,16 +34,19 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.samples.vision.face.itracker.R;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
@@ -62,8 +67,7 @@ import static java.security.AccessController.getContext;
 public final class FaceTrackerActivity extends AppCompatActivity {
     private static final String TAG = "FaceTracker";
 
-    private Button btnTracking;
-    private RelativeLayout topLayout;
+    private LinearLayout topLayout;
 
     private boolean pGranted = false;
 
@@ -84,9 +88,20 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        btnTracking = (Button) findViewById(R.id.btnTrack);
-        topLayout = (RelativeLayout) findViewById(R.id.topLayout);
+        // Define ActionBar object
+        ActionBar actionBar;
+        actionBar = getSupportActionBar();
 
+        // Define ColorDrawable object and parse color
+        // using parseColor method
+        // with color hash code as its parameter
+        ColorDrawable colorDrawable
+                = new ColorDrawable(this.getColor(R.color.colorPrimaryDark));
+
+        // Set BackgroundDrawable
+        actionBar.setBackgroundDrawable(colorDrawable);
+
+        topLayout = (LinearLayout) findViewById(R.id.topLayout);
 
             // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
@@ -99,15 +114,22 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, OVERLAY_PERMISSION_CODE);
         }
-
-        btnTracking.setOnClickListener(new View.OnClickListener() {
+        //Open voice activity
+        findViewById(R.id.btnVoice).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (pGranted) {
-
-                }
+                startActivity(new Intent(FaceTrackerActivity.this, Voice.class));
             }
         });
+        //Bring user to accessibility settings page, allow them to start service manually.
+        findViewById(R.id.btnStartCursor).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivityForResult(intent, 0);
+            }
+        });
+
     }
 
 
@@ -191,4 +213,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.ok, listener)
                 .show();
     }
+
+    @Override
+    public void onBackPressed() {}//We don't want users to return to "main" AppArt Screen!!
 }

@@ -1,11 +1,8 @@
-package com.google.android.gms.samples.vision.face.itracker;
+package com.google.android.gms.samples.vision.face.itracker.service;
 
 import android.content.Context;
-import android.os.Handler;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;

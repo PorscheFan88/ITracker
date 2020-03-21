@@ -1,43 +1,31 @@
-package com.google.android.gms.samples.vision.face.itracker;
+package com.google.android.gms.samples.vision.face.itracker.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
+import com.google.android.gms.samples.vision.face.itracker.R;
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.face.Landmark;
 
 import java.io.IOException;
 
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 
 public class CursorService extends AccessibilityService {
     private static final String TAG = CursorService.class.getName();
-    private FrameLayout cursorLayout, settingsLayout;
+    private FrameLayout cursorLayout;
 
     private CameraSourcePreview mPreview;
     private GraphicFaceTracker mFaceTracker;
@@ -204,4 +192,5 @@ public class CursorService extends AccessibilityService {
             mCameraSource.release();
         }
     }
+
 }

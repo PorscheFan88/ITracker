@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_fiber_manual_record_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_add_circle_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -29,8 +29,8 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="sync_circle" />
-                            <entry key="sourceFile" value="C:\Users\rjklasse" />
+                            <entry key="outputName" value="ic_add_circle" />
+                            <entry key="sourceFile" value="C:\Users\rjklasse\Desktop\Stick of Power\Stick of Power 2019-20 - Copy\1050 - Introductory Engineering Design and Innovation\Design Projects\Project C (Pre-2018)\2019\igaze_buttons_activated.svg" />
                           </map>
                         </option>
                       </PersistentState>

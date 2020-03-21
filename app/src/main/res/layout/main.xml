@@ -1,21 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
+    android:background="@color/mint_cream"
     >
-
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/btnTrack"
-        android:text="Begin Tracking"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        style="@style/MainButton"
+        android:text="@string/cursor"
+        android:textSize="25sp"
+        android:id="@+id/btnStartCursor"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        style="@style/MainButton"
+        android:text="@string/voice"
+        android:textSize="25sp"
+        android:id="@+id/btnVoice"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        style="@style/MainButton"
+        android:text="@string/settings"
+        android:textSize="25sp"
+        android:id="@+id/btnSettings"
+        />
 
 
-</RelativeLayout>
+</LinearLayout>

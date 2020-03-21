@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="turquoise">#2DE1C2</color>
+    <color name="english_green">#1A535C</color>
+    <color name="mint_cream">#F7FFF7</color>
+    <color name="pastel_red">#FF6B6B</color>
+    <color name="maize">#FFE66D</color>
+    <color name="purple">#4F2683</color>
+    <color name="silver">#807F83</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="colorPrimary">@color/white</color>
+    <color name="colorPrimaryDark">@color/purple</color>
+    <color name="colorAccent">@color/silver</color>
+</resources>

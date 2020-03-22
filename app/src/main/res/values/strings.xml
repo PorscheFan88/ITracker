@@ -32,4 +32,22 @@
     <string name="delete">Delete</string>
     <string name="incorrect_input">Incorrect Input</string>
     <string name="word_added">Word Added!</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="gestures_header">Gestures</string>
+    <string name="cursor_header">Cursor</string>
+    <string name="about_header">About iGaze</string>
+
+    <!-- Gesture Preferences -->
+    <string name="smile_sensitivity">Smile Sensitivity</string>
+    <string name="eyebrow_sensitivity">Eyebrow Sensitivity</string>
+    <string name="hold_time">Hold Gesture Time</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 </resources>

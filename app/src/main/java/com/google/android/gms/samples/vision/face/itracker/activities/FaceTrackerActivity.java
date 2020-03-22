@@ -32,17 +32,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -55,6 +54,7 @@ import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.samples.vision.face.itracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Landmark;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 
@@ -127,6 +127,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
                 startActivityForResult(intent, 0);
+            }
+        });
+
+        findViewById(R.id.btnSettings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(FaceTrackerActivity.this, SettingsActivity.class));
             }
         });
 

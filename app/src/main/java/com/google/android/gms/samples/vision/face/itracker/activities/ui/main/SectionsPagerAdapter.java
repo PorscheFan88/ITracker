@@ -1,12 +1,12 @@
 package com.google.android.gms.samples.vision.face.itracker.activities.ui.main;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.samples.vision.face.itracker.R;
 

@@ -4,22 +4,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+
 import com.google.android.gms.samples.vision.face.itracker.R;
 import com.google.android.gms.samples.vision.face.itracker.activities.ui.main.SectionsPagerAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 
@@ -43,16 +39,16 @@ public class Voice extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        //Load shared preferences for words
-        final SharedPreferences pref = getSharedPreferences("MyPref", 0); // 0 - for private mode
-
-        greetings = SharedPreferenceWords.toArrayList(pref, "greeting_");
-        actions = SharedPreferenceWords.toArrayList(pref, "action_");
-        reactions = SharedPreferenceWords.toArrayList(pref, "reaction_");
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                //Load shared preferences for words
+                final SharedPreferences pref = getSharedPreferences("MyPref", 0); // 0 - for private mode
+
+                greetings = SharedPreferenceWords.toArrayList(pref, "greeting_");
+                actions = SharedPreferenceWords.toArrayList(pref, "action_");
+                reactions = SharedPreferenceWords.toArrayList(pref, "reaction_");
 
                 final Context context = Voice.this;
 

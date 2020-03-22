@@ -17,10 +17,13 @@
         android:label="@string/name"
         android:theme="@style/MainTheme">
         <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
+        <activity
             android:name=".activities.Voice"
             android:label="@string/title_activity_voice"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.StartUp"
             android:screenOrientation="portrait"

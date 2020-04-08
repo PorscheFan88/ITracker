@@ -16,15 +16,37 @@
 
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreferenceCompat
-        app:key="sync"
-        app:title="@string/sync_title" />
+    <ListPreference
+        app:key="click"
+        app:title="@string/click"
+        app:useSimpleSummaryProvider="true"
+        app:entries="@array/gestures"
+        app:entryValues="@array/gestures"
+        app:defaultValue="Smile"/>
 
-    <SwitchPreferenceCompat
-        app:dependency="sync"
-        app:key="attachment"
-        app:summaryOff="@string/attachment_summary_off"
-        app:summaryOn="@string/attachment_summary_on"
-        app:title="@string/attachment_title" />
+    <ListPreference
+        app:key="long_click"
+        app:title="@string/long_click"
+        app:useSimpleSummaryProvider="true"
+        app:entries="@array/gestures"
+        app:entryValues="@array/gestures"
+        app:defaultValue="Hold Smile"/>
+
+    <ListPreference
+        app:key="swipe"
+        app:title="@string/swipe"
+        app:useSimpleSummaryProvider="true"
+        app:entries="@array/gestures"
+        app:entryValues="@array/gestures"
+        app:defaultValue="Eyebrow Lift"/>
+
+    <ListPreference
+        app:key="cursor_sensitivity"
+        app:title="@string/cursor_sensitivity"
+        app:useSimpleSummaryProvider="true"
+        app:entries="@array/sensitivity_values"
+        app:entryValues="@array/sensitivity_values"
+        app:defaultValue="High"/>
+
 
 </PreferenceScreen>

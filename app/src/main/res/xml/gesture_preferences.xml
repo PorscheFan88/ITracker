@@ -42,4 +42,13 @@
         app:useSimpleSummaryProvider="true"
        />
 
+    <ListPreference
+        app:defaultValue="2 seconds"
+        app:entries="@array/hold_time_values"
+        app:entryValues="@array/hold_time_values"
+        app:key="hold_time"
+        app:title="Long Smile Time"
+        app:useSimpleSummaryProvider="true"
+        />
+
 </PreferenceScreen>

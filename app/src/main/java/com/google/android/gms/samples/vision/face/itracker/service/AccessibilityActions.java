@@ -2,6 +2,8 @@ package com.google.android.gms.samples.vision.face.itracker.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -31,10 +33,9 @@ public class AccessibilityActions {
         if (nodeInfo == null) return;
         AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorService.getX(), cursorService.getY()+50);
         if (nearestNodeToMouse != null) {
-            logNodeHierachy(nearestNodeToMouse, 0);
+            nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_SELECT);
             nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         } else {
-            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
             Log.e(TAG, "Nearest Node is null");
         }
     }
@@ -44,18 +45,6 @@ public class AccessibilityActions {
      */
     public void longClick() {
 
-        Log.d(TAG, String.format("Click [%d, %d]", cursorService.getX(), cursorService.getY()));
-        nodeInfo = cursorService.getRootInActiveWindow();
-
-        if (nodeInfo == null) return;
-        AccessibilityNodeInfo nearestNodeToMouse = findSmallestNodeAtPoint(nodeInfo, cursorService.getX(), cursorService.getY()+50);
-        if (nearestNodeToMouse != null) {
-            logNodeHierachy(nearestNodeToMouse, 0);
-            nearestNodeToMouse.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-        } else {
-            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
-            Log.e(TAG, "Nearest Node is null");
-        }
     }
 
     public void goHome(Context ctx) {
@@ -93,7 +82,7 @@ public class AccessibilityActions {
         }
     }
 
-    private static AccessibilityNodeInfo findSmallestNodeAtPoint(AccessibilityNodeInfo sourceNode, int x, int y) {
+    private  AccessibilityNodeInfo findSmallestNodeAtPoint(AccessibilityNodeInfo sourceNode, int x, int y) {
         Rect bounds = new Rect();
         sourceNode.getBoundsInScreen(bounds);
 
@@ -101,10 +90,16 @@ public class AccessibilityActions {
             return null;
         }
 
-        for (int i=0; i<sourceNode.getChildCount(); i++) {
+
+        for (int i = 0; i < sourceNode.getChildCount(); i++) {
             AccessibilityNodeInfo nearestSmaller = findSmallestNodeAtPoint(sourceNode.getChild(i), x, y);
             if (nearestSmaller != null) {
-                return nearestSmaller;
+                if (nearestSmaller.getActionList().contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
+
+                    return nearestSmaller;
+                } else {
+                    return sourceNode;
+                }
             }
         }
         return sourceNode;

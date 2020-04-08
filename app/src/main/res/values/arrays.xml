@@ -14,4 +14,12 @@
         <item>4 seconds</item>
         <item>5 seconds</item>
     </string-array>
+
+    <string-array name="gestures">
+        <item>Smile</item>
+        <item>Eyebrow Lift</item>
+        <item>Hold Gesture</item>
+        <item>Hold Smile</item>
+    </string-array>
+
 </resources>

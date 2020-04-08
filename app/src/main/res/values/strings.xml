@@ -44,10 +44,9 @@
     <string name="eyebrow_sensitivity">Eyebrow Sensitivity</string>
     <string name="hold_time">Hold Gesture Time</string>
 
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <!-- Cursor Preferences -->
+    <string name="click">Click</string>
+    <string name="long_click">Long Click</string>
+    <string name="swipe">Swipe</string>
+    <string name="cursor_sensitivity">Cursor Sensitivity</string>
 </resources>

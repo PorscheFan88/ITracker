@@ -90,8 +90,6 @@ public class GraphicFaceTracker extends Tracker<Face> {
         if (face.getIsSmilingProbability() > 0.5) {
             if (clickC < 1) {//Perform individual click
                 cursorService.click();
-            } else if (clickC > 5) {//Perform long click
-                cursorService.longClick();
             }
             clickC++;
         } else {

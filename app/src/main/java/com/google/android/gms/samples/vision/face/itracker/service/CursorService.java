@@ -1,6 +1,7 @@
 package com.google.android.gms.samples.vision.face.itracker.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Handler;
@@ -145,6 +146,10 @@ public class CursorService extends AccessibilityService {
 
     public void click() {
         accessibilityActions.click();
+    }
+
+    public Activity getActivity() {
+        return getActivity();
     }
 
     public void longClick(){
